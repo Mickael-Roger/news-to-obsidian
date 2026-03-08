@@ -1,0 +1,87 @@
+# news-to-obsidian configuration file
+# Copy this file to config.yaml and adapt to your setup.
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Paths
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Absolute or ~ path to the FreshRSS SQLite database
+freshrss_db: ~/freshrss/data/users/your_user/db.sqlite
+
+# Absolute or ~ path to the root of your Obsidian vault
+obsidian_vault: ~/Documents/Obsidian/MyVault
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Behaviour
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Remove the FreshRSS label from the entry after successful processing.
+# Set to false if you want to test without side-effects (or use --dry-run).
+remove_tag_after_processing: true
+
+# ──────────────────────────────────────────────────────────────────────────────
+# LLM
+# ──────────────────────────────────────────────────────────────────────────────
+# litellm is used, so any provider supported by litellm works here.
+# See: https://docs.litellm.ai/docs/providers
+
+llm:
+  # Model string understood by litellm, e.g.:
+  #   anthropic/claude-3-5-sonnet-20241022
+  #   openai/gpt-4o
+  #   ollama/llama3
+  #   azure/gpt-4o  (set api_base to your Azure endpoint)
+  model: anthropic/claude-3-5-haiku-20241022
+
+  # API key for the provider.
+  # Leave empty to rely on the provider's standard environment variable
+  # (ANTHROPIC_API_KEY, OPENAI_API_KEY, etc.)
+  api_key: ""
+
+  # Optional: custom base URL (useful for Ollama, Azure, or local proxies)
+  api_base: ""
+
+  # Any extra litellm completion parameters (optional)
+  # temperature: 0.3
+  # max_tokens: 4096
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Rules
+# ──────────────────────────────────────────────────────────────────────────────
+# Each rule maps a FreshRSS label to a LLM consign and an output location.
+
+rules:
+  # ── Example 1: Quick personal note ─────────────────────────────────────────
+  - tag: "To Note"
+    consign: |
+      Write a concise Obsidian note (200–400 words) about this article.
+      Structure: a short summary paragraph, then a "Key takeaways" bullet list
+      (3–5 bullets), and finally a "My thoughts" section with a few sentences
+      of personal reflection written in first person.
+      Use Markdown. Do not include the article metadata — it will be added as
+      frontmatter automatically.
+    output_folder: "News/Notes"
+    filename_template: "{date}-{title}"
+    include_content: true
+
+  # ── Example 2: Full article page ───────────────────────────────────────────
+  - tag: "To Page"
+    consign: |
+      Transform this article into a detailed Obsidian wiki page.
+      Include: an introduction, clearly structured sections with ## headings,
+      key concepts explained, relevant links (preserve any from the article),
+      and a "References" section at the end.
+      The tone should be encyclopaedic and neutral.
+    output_folder: "Knowledge"
+    filename_template: "{title}"
+    include_content: true
+
+  # ── Example 3: Watch list (no LLM content, just metadata) ──────────────────
+  - tag: "To Watch"
+    consign: |
+      Write a very short note (2–3 sentences) explaining what this video or
+      resource is about and why it could be worth watching.
+      End with a "Watch later" checkbox: - [ ] Watch
+    output_folder: "Watch Later"
+    filename_template: "{date}-{title}"
+    include_content: false

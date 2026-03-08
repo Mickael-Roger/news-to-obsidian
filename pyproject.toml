@@ -1,0 +1,27 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "news-to-obsidian"
+version = "0.1.0"
+description = "Bridge FreshRSS labelled news to Obsidian notes via LLM"
+requires-python = ">=3.11"
+dependencies = [
+    "litellm>=1.40.0",
+    "pyyaml>=6.0",
+    "click>=8.1",
+    "python-slugify>=8.0",
+    "markdownify>=0.12",
+]
+
+[project.scripts]
+news-to-obsidian = "news_to_obsidian.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/news_to_obsidian"]
+
+[tool.hatch.envs.default]
+dependencies = [
+    "pytest>=8.0",
+]
