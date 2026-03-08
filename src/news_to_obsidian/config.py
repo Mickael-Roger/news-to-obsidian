@@ -16,17 +16,17 @@ class LLMConfig:
 
     model: str
     api_key: str = ""
-    api_base: str = ""
+    base_url: str = ""
     extra: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "LLMConfig":
-        known = {"model", "api_key", "api_base"}
+        known = {"model", "api_key", "base_url"}
         extra = {k: v for k, v in data.items() if k not in known}
         return cls(
             model=data["model"],
             api_key=data.get("api_key", os.environ.get("LLM_API_KEY", "")),
-            api_base=data.get("api_base", ""),
+            base_url=data.get("base_url", ""),
             extra=extra,
         )
 

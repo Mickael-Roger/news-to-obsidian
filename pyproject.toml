@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Bridge FreshRSS labelled news to Obsidian notes via LLM"
 requires-python = ">=3.11"
 dependencies = [
-    "litellm>=1.40.0",
+    "openai>=1.0.0",
     "pyyaml>=6.0",
     "click>=8.1",
     "python-slugify>=8.0",

@@ -22,26 +22,27 @@ remove_tag_after_processing: true
 # ──────────────────────────────────────────────────────────────────────────────
 # LLM
 # ──────────────────────────────────────────────────────────────────────────────
-# litellm is used, so any provider supported by litellm works here.
-# See: https://docs.litellm.ai/docs/providers
+# The openai Python SDK is used, so any OpenAI-compatible API endpoint works.
 
 llm:
-  # Model string understood by litellm, e.g.:
-  #   anthropic/claude-3-5-sonnet-20241022
-  #   openai/gpt-4o
-  #   ollama/llama3
-  #   azure/gpt-4o  (set api_base to your Azure endpoint)
-  model: anthropic/claude-3-5-haiku-20241022
+  # Model name as expected by the endpoint, e.g.:
+  #   glm-4-flash          (Zhipu AI / GLM)
+  #   gpt-4o               (OpenAI)
+  #   mistral              (Ollama local)
+  model: glm-4-flash
 
   # API key for the provider.
-  # Leave empty to rely on the provider's standard environment variable
-  # (ANTHROPIC_API_KEY, OPENAI_API_KEY, etc.)
+  # Leave empty to rely on the OPENAI_API_KEY environment variable.
   api_key: ""
 
-  # Optional: custom base URL (useful for Ollama, Azure, or local proxies)
-  api_base: ""
+  # Base URL of the OpenAI-compatible endpoint.
+  # Leave empty to use the default OpenAI endpoint (https://api.openai.com/v1).
+  # Examples:
+  #   https://open.bigmodel.cn/api/paas/v4/   (Zhipu AI / GLM)
+  #   http://localhost:11434/v1               (Ollama)
+  base_url: "https://open.bigmodel.cn/api/paas/v4/"
 
-  # Any extra litellm completion parameters (optional)
+  # Any extra openai.chat.completions.create parameters (optional)
   # temperature: 0.3
   # max_tokens: 4096
 

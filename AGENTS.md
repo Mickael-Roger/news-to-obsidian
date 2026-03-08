@@ -12,7 +12,7 @@ The app reads the FreshRSS **SQLite database** directly, looks for entries carry
 |------|---------|
 | `src/news_to_obsidian/config.py` | YAML config loading (`Config`, `LLMConfig`, `TagRule`) |
 | `src/news_to_obsidian/freshrss.py` | SQLite read/write (`FreshRSSDB`, `Entry`) |
-| `src/news_to_obsidian/llm.py` | LLM call via litellm; prompt construction |
+| `src/news_to_obsidian/llm.py` | LLM call via openai SDK (OpenAI-compatible); prompt construction |
 | `src/news_to_obsidian/obsidian.py` | Obsidian note writing (frontmatter + content) |
 | `src/news_to_obsidian/cli.py` | Click CLI entry point (`news-to-obsidian`) |
 | `config.example.yaml` | Annotated example configuration |
@@ -38,7 +38,7 @@ Config.from_file()
      │
      ├─► FreshRSSDB.entries_for_tag(tag)  ── JOIN entry + feed + entrytag + tag
      │
-     ├─► call_llm(entry, rule, llm_cfg)   ── litellm.completion()
+     ├─► call_llm(entry, rule, llm_cfg)   ── openai.chat.completions.create()
      │        └── build_user_message()    ── consign + metadata + (optional) HTML→MD content
      │
      ├─► write_note(vault, rule, entry, content)
@@ -55,9 +55,9 @@ obsidian_vault: ~/path/to/vault
 remove_tag_after_processing: true
 
 llm:
-  model: anthropic/claude-3-5-haiku-20241022  # any litellm model string
-  api_key: ""   # or set provider env var (ANTHROPIC_API_KEY, etc.)
-  api_base: ""  # for Ollama / Azure / local proxies
+  model: glm-4-flash            # model name as expected by the endpoint
+  api_key: ""                   # or set OPENAI_API_KEY env var
+  base_url: "https://open.bigmodel.cn/api/paas/v4/"  # any OpenAI-compatible endpoint
 
 rules:
   - tag: "My FreshRSS label"
@@ -104,4 +104,5 @@ uv pip install -e .
 - The FreshRSS DB uses Unix timestamps (seconds) for `entry.date`.
 - Tag removal must target the `entrytag` join table, not the `tag` table itself.
 - Use `uv pip install -e .` on NixOS (system Python is externally managed).
-- litellm is used for provider-agnostic LLM calls; model strings follow the `provider/model` convention.
+- The openai SDK is used for LLM calls; it works with any OpenAI-compatible endpoint via `base_url`.
+- `api_key` defaults to the `OPENAI_API_KEY` env var if not set in config; set `"no-key"` is used as placeholder when key is empty (some local endpoints require a non-empty string).

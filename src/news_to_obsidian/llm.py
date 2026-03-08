@@ -1,11 +1,8 @@
-"""LLM processing via litellm."""
+"""LLM processing via openai-compatible API."""
 
 from __future__ import annotations
 
-import os
-from typing import Any
-
-from markdownify import markdownify
+from openai import OpenAI
 
 from .config import LLMConfig, TagRule
 from .freshrss import Entry
@@ -21,6 +18,8 @@ explanation outside the note itself.
 
 def build_user_message(entry: Entry, rule: TagRule) -> str:
     """Build the user-facing prompt sent to the LLM."""
+    from markdownify import markdownify
+
     parts: list[str] = []
 
     parts.append(f"# Instructions\n{rule.consign}")
@@ -42,34 +41,26 @@ def build_user_message(entry: Entry, rule: TagRule) -> str:
 
 def call_llm(entry: Entry, rule: TagRule, llm_cfg: LLMConfig) -> str:
     """
-    Call the LLM and return the generated Markdown note content.
+    Call the LLM via an OpenAI-compatible API and return the generated
+    Markdown note content.
 
-    Uses litellm so the same code works with any provider (Anthropic,
-    OpenAI, Ollama, Azure, etc.) by just changing the model string and
-    optional api_base / api_key in the config.
+    Works with any OpenAI-compatible provider (GLM, Ollama, Azure OpenAI,
+    local proxies, etc.) by adjusting base_url / api_key / model in config.
     """
-    # Import here so the rest of the module is importable without litellm
-    import litellm  # noqa: PLC0415
-
-    # Override the API key / base if provided
-    kwargs: dict[str, Any] = {}
-    if llm_cfg.api_key:
-        kwargs["api_key"] = llm_cfg.api_key
-    if llm_cfg.api_base:
-        kwargs["api_base"] = llm_cfg.api_base
-
-    # Pass any extra keys from the config (e.g. temperature, max_tokens)
-    kwargs.update(llm_cfg.extra)
+    client = OpenAI(
+        api_key=llm_cfg.api_key or "no-key",
+        base_url=llm_cfg.base_url or None,
+    )
 
     messages = [
         {"role": "system", "content": _SYSTEM_PROMPT},
         {"role": "user", "content": build_user_message(entry, rule)},
     ]
 
-    response = litellm.completion(
+    response = client.chat.completions.create(
         model=llm_cfg.model,
         messages=messages,
-        **kwargs,
+        **llm_cfg.extra,
     )
 
     return response.choices[0].message.content.strip()
